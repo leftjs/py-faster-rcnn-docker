@@ -17,14 +17,25 @@ RUN rm ~/anaconda3.sh
 WORKDIR /root/anaconda3/envs/py-faster-r-cnn
 RUN  mkdir -p ./etc/conda/activate.d
 RUN mkdir -p ./etc/conda/deactivate.d
-RUN echo $'#!/bin/sh\n\
+RUN echo '#!/bin/sh\n\
          export OLD_LD_LIBRARY_PATH=$LD_LIBRARY_PATH\n\
          export LD_LIBRARY_PATH=/root/anaconda3/envs/py-faster-r-cnn/lib:$LD_LIBRARY_PATH\n'\
          > ./etc/conda/activate.d/env_vars.sh
-RUN echo $'#!/bin/sh\n\
+RUN echo '#!/bin/sh\n\
           export LD_LIBRARY_PATH=$OLD_LD_LIBRARY_PATH\n\
           unset OLD_LD_LIBRARY_PATH\n'\
           > ./etc/conda/deactivate.d/env_vars.sh
+
+RUN apt-get install -y git
+WORKDIR /root
+RUN git clone --recursive https://github.com/splashblot/py-faster-rcnn.git
+WORKDIR /root/py-faster-rcnn
+COPY files/Makefile.config caffe-fast-rcnn/
+WORKDIR /root/py-faster-rcnn/caffe-fast-rcnn
+RUN /bin/bash -c "source activate py-faster-r-cnn && make clean && make all -j8 && make pycaffe"
+WORKDIR /root/py-faster-rcnn/lib
+RUN /bin/bash -c "source activate py-faster-r-cnn && make"
+
 
 
 # Installing lippng16
