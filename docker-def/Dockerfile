@@ -2,7 +2,6 @@ FROM nvidia/cuda:7.5-cudnn3-devel
 
 COPY files/.screenrc /root/.screenrc
 
-#RUN apt-get update && apt-get install -y screen wget nano libgoogle-glog-dev liblmdb-dev git openssh-client libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev libhdf5-serial-dev protobuf-compiler bundler
 RUN apt-get update && apt-get install -y screen wget nano openssh-client protobuf-compiler bundler libopencv-dev
 
 RUN wget https://repo.continuum.io/archive/Anaconda3-4.2.0-Linux-x86_64.sh -O ~/anaconda3.sh
@@ -10,7 +9,9 @@ RUN bash ~/anaconda3.sh -b -p ~/anaconda3
 ENV PATH /root/anaconda3/bin:${PATH}
 COPY files/caffe-requirements-conda3.txt /tmp/caffe-requirements-conda3.txt
 RUN conda create -y --name py-faster-r-cnn python=3.5 --file /tmp/caffe-requirements-conda3.txt -c conda-forge -c menpo -c ActivisionGameScience
-RUN /bin/bash -c "source activate py-faster-r-cnn && pip install easydict"
+COPY files/run-on-env /usr/bin/run-on-env
+RUN chmod a+x /usr/bin/run-on-env
+RUN run-on-env pip install easydict
 RUN echo "source activate py-faster-r-cnn" >> /root/.bashrc
 RUN rm ~/anaconda3.sh
 
@@ -30,20 +31,14 @@ RUN apt-get install -y git
 WORKDIR /root
 RUN git clone --recursive https://github.com/splashblot/py-faster-rcnn.git
 WORKDIR /root/py-faster-rcnn
+# Checking out just particular commit
+RUN git fetch && git checkout d6722736f869386fa42af6c2f1e04249d9c7cdd1
 COPY files/Makefile.config caffe-fast-rcnn/
 WORKDIR /root/py-faster-rcnn/caffe-fast-rcnn
-RUN /bin/bash -c "source activate py-faster-r-cnn && make clean && make all -j8 && make pycaffe"
+RUN run-on-env make clean && run-on-env make all -j8 && run-on-env make pycaffe
 WORKDIR /root/py-faster-rcnn/lib
-RUN /bin/bash -c "source activate py-faster-r-cnn && make"
+RUN run-on-env make
 
-
-
-# Installing lippng16
-#RUN cd /root
-#RUN git clone https://github.com/dimensio/libpng16-deb.git
-#RUN cd libpng16-deb
-#RUN bundle install
-#RUN make
 
 # For solving caffe compilation problem with float128 see:
 # http://www.pcl-users.org/Installation-Trouble-Boost-float128-td4040519.html
@@ -54,4 +49,4 @@ RUN /bin/bash -c "source activate py-faster-r-cnn && make"
 # For solving caffe compilation problem "No to_python (by-value) converter found" see:
 # https://github.com/BVLC/caffe/issues/3494
 
-#RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*

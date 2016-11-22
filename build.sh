@@ -1,1 +1,1 @@
-nvidia-docker build -t tileo/caffe docker-def
+nvidia-docker build -t splashblot/py-faster-rcnn docker-def
