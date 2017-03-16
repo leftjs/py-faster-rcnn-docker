@@ -1,4 +1,5 @@
 FROM nvidia/cuda:7.5-cudnn3-devel
+ARG cpu_or_gpu=gpu
 
 COPY files/.screenrc /root/.screenrc
 
@@ -33,7 +34,7 @@ RUN git clone --recursive https://github.com/splashblot/py-faster-rcnn.git
 WORKDIR /root/py-faster-rcnn
 # Checking out just particular commit
 RUN git fetch && git checkout d6722736f869386fa42af6c2f1e04249d9c7cdd1
-COPY files/Makefile.config caffe-fast-rcnn/
+COPY files/Makefile-${cpu_or_gpu}.config caffe-fast-rcnn/Makefile.config
 WORKDIR /root/py-faster-rcnn/caffe-fast-rcnn
 RUN run-on-env make clean && run-on-env make all -j8 && run-on-env make pycaffe
 WORKDIR /root/py-faster-rcnn/lib
