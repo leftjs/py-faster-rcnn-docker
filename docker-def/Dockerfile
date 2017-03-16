@@ -36,7 +36,7 @@ WORKDIR /root/py-faster-rcnn
 RUN git fetch && git checkout d6722736f869386fa42af6c2f1e04249d9c7cdd1
 COPY files/Makefile-${cpu_or_gpu}.config caffe-fast-rcnn/Makefile.config
 WORKDIR /root/py-faster-rcnn/caffe-fast-rcnn
-RUN run-on-env make clean && run-on-env make all -j8 && run-on-env make pycaffe
+RUN run-on-env make clean && run-on-env make proto && run-on-env make all -j8 && run-on-env make pycaffe
 WORKDIR /root/py-faster-rcnn/lib
 RUN run-on-env make
 
