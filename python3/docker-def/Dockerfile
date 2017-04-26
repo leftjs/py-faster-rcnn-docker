@@ -30,10 +30,10 @@ RUN echo '#!/bin/sh\n\
 
 RUN apt-get install -y git
 WORKDIR /root
-RUN git clone --recursive https://github.com/splashblot/py-faster-rcnn.git
+RUN git clone --recursive -b python3 https://github.com/splashblot/py-faster-rcnn.git
 WORKDIR /root/py-faster-rcnn
 # Checking out just particular commit
-RUN git fetch && git checkout d6722736f869386fa42af6c2f1e04249d9c7cdd1
+RUN git fetch && git checkout 5fcd5ea8e5db277320ef29bf6ae6a5a4886377b5
 COPY files/Makefile-${cpu_or_gpu}.config caffe-fast-rcnn/Makefile.config
 WORKDIR /root/py-faster-rcnn/caffe-fast-rcnn
 RUN run-on-env make clean && run-on-env make proto && run-on-env make all -j8 && run-on-env make pycaffe
